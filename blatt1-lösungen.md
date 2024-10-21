@@ -8,6 +8,7 @@ Es sind n Variablen notwendig. Jedes Element der Zeichenkette benötigt eine Var
 
 Beweis:
 Sei o.B.d.A. d der Abstand. 
+
 Annahme:
 Zum prüfen ob eine binäre Zeichenkette der Längen n k Wiederholungen aufweist sind `n - d(k - 1)` Klauseln notwendig.
 
@@ -26,6 +27,7 @@ xoxox
 ```
 
 Dementsprechend gibt es `n - c` weitere Möglichkeiten um Abfolgen aus der Zeichenkette zu entnehemen.
+
 => es gibt `n - c + 1` Möglichkeiten Abfolgen aus der Kette zu entnehmen.
 ```
 n - c + 1              =
