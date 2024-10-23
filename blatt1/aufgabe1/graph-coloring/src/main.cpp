@@ -1,8 +1,12 @@
 #include <iostream>
-#include "third_party/cadical/include/cadical.hpp"
-#include "third_party/cadical/include/ipasir.h"
+#include "../third_party/cadical/include/cadical.hpp"
+#include "../third_party/cadical/include/ipasir.h"
 
 int main() {
+
+  //HOW IT SHOULD WORK
+
+
 
   void* solver = ipasir_init();
   //FIRST round
