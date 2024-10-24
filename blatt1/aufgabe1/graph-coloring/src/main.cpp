@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
   int colors = 1;
   void *solver = ipasir_init();
   bool solved = false;
+  int result;
 
   //initial clauses
   for (int i = 0; i < def->num_edges * 2; i += 2) {
@@ -82,7 +83,13 @@ int main(int argc, char *argv[]) {
     std::cout << "assume " << -colors * (def->num_nodes + 1) << std::endl;
 
     //check if solvable
-    solved = 10 == ipasir_solve(solver);
+    result = ipasir_solve(solver);
+    solved = 10 == result;
+
+    if(!solved && result != 20) {
+      std::cout << " Unsolvable" << std::endl;
+      exit(1);
+    }
   }
 
   auto done_time = std::chrono::high_resolution_clock::now();
