@@ -1,12 +1,8 @@
 //
 // Created by maxi on 10/24/24.
 //
-
 #ifndef GRAPH_COLORING_DIMACS_GRAPH_PARSER_H
 #define GRAPH_COLORING_DIMACS_GRAPH_PARSER_H
-//
-// Created by maxi on 10/24/24.
-//
 
 #include <iostream>
 #include <fstream>
