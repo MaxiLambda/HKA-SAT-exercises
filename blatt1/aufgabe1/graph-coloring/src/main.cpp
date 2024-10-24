@@ -1,9 +1,11 @@
 #include <iostream>
-#include "../third_party/cadical/include/cadical.hpp"
 #include "../third_party/cadical/include/ipasir.h"
 #include "dimacs_graph_parser.h"
+#include <chrono>
 
 int main(int argc, char *argv[]) {
+
+  auto start_time = std::chrono::high_resolution_clock::now();
 
   if(argc != 2) {
     std::cout << argc << " args supplied!" << std::endl;
@@ -11,6 +13,8 @@ int main(int argc, char *argv[]) {
   }
 
  Graph_Definition* def =   graph_from_file(argv[1]);
+
+  auto end_read_file = std::chrono::high_resolution_clock::now();
 
   //early return if no edges are given, one color is sufficient then
   if (def->num_edges == 0) {
@@ -80,6 +84,9 @@ int main(int argc, char *argv[]) {
     //check if solvable
     solved = 10 == ipasir_solve(solver);
   }
+
+  auto done_time = std::chrono::high_resolution_clock::now();
+
   std::cout << "Solvable with " << colors << " colors" << std::endl;
 
   //print the solution, each row corresponds to the bitvector of a node
@@ -91,5 +98,14 @@ int main(int argc, char *argv[]) {
     std::cout << std::endl;
   }
 
+  auto parse_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_read_file - start_time);
+  auto solve_time = std::chrono::duration_cast<std::chrono::milliseconds>(done_time - end_read_file);
+  auto full_time = std::chrono::duration_cast<std::chrono::milliseconds>(done_time - start_time);
+
+  //print again, because printing all the nodes takes a lot of space
+  std::cout << "Solvable with " << colors << " colors" << std::endl;
+  std::cout <<"Parsing file took " <<   parse_time.count()  << " ms" << std::endl;
+  std::cout <<"Solving took " <<   solve_time.count()  << " ms" << std::endl;
+  std::cout << "Full duration " << full_time.count() << " ms" << std::endl;
   return 0;
 }
