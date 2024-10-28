@@ -7,6 +7,7 @@
 #define WRITE_TO_FILE true
 #define WRITE_TO_CONSOLE false
 #define WRITE_STATUS_TO_CONSOLE false
+#define SPEED_OPTION true
 
 static int LITTLE_SIZE;
 static int SIZE;
@@ -32,6 +33,92 @@ void printClause(int *clause, int size) {
         fprintf(fptr, " 0\n");
     }
 }
+
+#if (SPEED_OPTION)
+void generateSpeedCNF() {
+    int clauseGrid[LITTLE_SIZE][SIZE];
+    int clauseRow[SIZE];
+    int clauseCol[SIZE];
+    int clauseKnown[SIZE];
+    int clauseOneSet[SIZE];
+    int conflictClauseCol[2];
+    int conflictClauseRow[2];
+    int conflictClauseGrid1[2];
+    int conflictClauseGrid2[2];
+    int conflictClauseGrid3[2];
+    for (int number = 0; number < SIZE; number++) {
+        for (int i = 0; i < SIZE; i++) {
+            char isSubGrid = 0;
+            //known number
+            if (mySudoku[number][i] != 0) {
+                for (int iii = 1; iii <= SIZE; iii++) {
+                    if (mySudoku[number][i] == iii) {
+                        clauseKnown[0] = (iii + number * SIZE * SIZE + i * SIZE);
+                    } else {
+                        clauseKnown[0] = -(iii + number * SIZE * SIZE + i * SIZE);
+                    }
+                    printClause(clauseKnown, 1);
+                }
+            }
+
+            for (int ii = 0; ii < SIZE; ii++) {
+                //row
+                clauseRow[ii] = (number + i * SIZE * SIZE + 1) + SIZE * ii;
+
+                //col
+                clauseCol[ii] = (number + i * SIZE + 1) + SIZE * SIZE * ii;
+
+                //subGrid
+                if (i < LITTLE_SIZE && ii < LITTLE_SIZE) {
+                    isSubGrid = 1;
+                    int index = 0;
+                    for (int row = 0; row < LITTLE_SIZE; row++) {
+                        for (int col = 0; col < LITTLE_SIZE; col++) {
+                            clauseGrid[ii][index++] = number + 1 + (i * LITTLE_SIZE * SIZE + row * SIZE) * SIZE + (
+                                                          ii * LITTLE_SIZE * SIZE + col * SIZE);
+                        }
+                    }
+                    printClause(clauseGrid[ii], SIZE);
+                }
+
+                //oneMustBeSet
+                clauseOneSet[ii] = (ii + 1 + number * SIZE * SIZE) + i * SIZE;
+            }
+            printClause(clauseRow, SIZE);
+            printClause(clauseCol, SIZE);
+            printClause(clauseOneSet, SIZE);
+
+            // only one clause
+            for (int iii = 0; iii < SIZE; iii++) {
+                conflictClauseRow[0] = -clauseRow[iii];
+                conflictClauseCol[0] = -clauseCol[iii];
+                conflictClauseGrid1[0] = -clauseGrid[0][iii];
+                conflictClauseGrid2[0] = -clauseGrid[1][iii];
+                conflictClauseGrid3[0] = -clauseGrid[2][iii];
+                for (int iv = iii + 1; iv < SIZE; iv++) {
+                    //row
+                    conflictClauseRow[1] = -clauseRow[iv];
+                    printClause(conflictClauseRow, 2);
+
+                    // col
+                    conflictClauseCol[1] = -clauseCol[iv];
+                    printClause(conflictClauseCol, 2);
+
+                    //subGrid
+                    if (isSubGrid == 1) {
+                        conflictClauseGrid1[1] = -clauseGrid[0][iv];
+                        printClause(conflictClauseGrid1, 2);
+                        conflictClauseGrid2[1] = -clauseGrid[1][iv];
+                        printClause(conflictClauseGrid2, 2);
+                        conflictClauseGrid3[1] = -clauseGrid[2][iv];
+                        printClause(conflictClauseGrid3, 2);
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
 
 void generateRowCnf() {
     printf("generate Row CNF\n");
@@ -434,9 +521,9 @@ void showSudokuSolution() {
     }
 }
 
-int main(int argc, char **argv) {
-    char* sudoKuFilePath = NULL;
-    char* satSolverPath = NULL;
+int main(const int argc, char **argv) {
+    const char* sudoKuFilePath = NULL;
+    const char* satSolverPath = NULL;
     int opt;
     while ((opt = getopt(argc, argv, "f:s:")) != -1) {
         switch (opt) {
@@ -484,11 +571,15 @@ int main(int argc, char **argv) {
     fclose(fptr);
 
     fptr = fopen("clauses.dimacs", "a");
-    generateRowCnf();
-    generateColumnCnf();
+#if (SPEED_OPTION)
+    generateSpeedCNF();
+#else
+    // generateRowCnf();
+    // generateColumnCnf();
     generateSubgridCnf();
-    generateKnownNumbersCnf();
-    generateOneNumberMustBeSetCnf();
+    // generateKnownNumbersCnf();
+    // generateOneNumberMustBeSetCnf();
+#endif
     fclose(fptr);
 
     printf("Calculate solution\n");
