@@ -11,6 +11,7 @@
 
 static int LITTLE_SIZE;
 static int SIZE;
+static int SIZE_QUAD;
 int** mySudoku;
 int** solvedSudoku;
 FILE* fptr;
@@ -27,7 +28,7 @@ void printClause(int *clause, int size) {
 
     if (WRITE_TO_FILE) {
         for (int i = 0; i < size; i++) {
-            if (i != 0) fprintf(fptr, " ");
+            if (i != 0) fprintf(fptr, " "); // TODO does the compiler optimize this?
             fprintf(fptr, "%d", clause[i]);
         }
         fprintf(fptr, " 0\n");
@@ -47,26 +48,32 @@ void generateSpeedCNF() {
     int conflictClauseGrid2[2];
     int conflictClauseGrid3[2];
     for (int number = 0; number < SIZE; number++) {
+        const int numberSizeSize = number * SIZE_QUAD;
         for (int i = 0; i < SIZE; i++) {
+            const int iSize = i * SIZE;
+            const int iSizeNumberSizeSize = numberSizeSize + iSize;
             char isSubGrid = 0;
             //known number
             if (mySudoku[number][i] != 0) {
                 for (int iii = 1; iii <= SIZE; iii++) {
                     if (mySudoku[number][i] == iii) {
-                        clauseKnown[0] = (iii + number * SIZE * SIZE + i * SIZE);
+                        clauseKnown[0] = iii + iSizeNumberSizeSize;
                     } else {
-                        clauseKnown[0] = -(iii + number * SIZE * SIZE + i * SIZE);
+                        clauseKnown[0] = -(iii + iSizeNumberSizeSize);
                     }
                     printClause(clauseKnown, 1);
                 }
-            }
+            } // TODO evtl. einen else Zweig?
 
+            const int numberISizeSize1 = number + iSize * SIZE + 1;
+            const int numberISizeSize11 = number + iSize + 1;
             for (int ii = 0; ii < SIZE; ii++) {
+                const int iiSize = SIZE * ii;
                 //row
-                clauseRow[ii] = (number + i * SIZE * SIZE + 1) + SIZE * ii;
+                clauseRow[ii] = numberISizeSize1 + iiSize;
 
                 //col
-                clauseCol[ii] = (number + i * SIZE + 1) + SIZE * SIZE * ii;
+                clauseCol[ii] = numberISizeSize11 + SIZE * iiSize;
 
                 //subGrid
                 if (i < LITTLE_SIZE && ii < LITTLE_SIZE) {
@@ -82,7 +89,7 @@ void generateSpeedCNF() {
                 }
 
                 //oneMustBeSet
-                clauseOneSet[ii] = (ii + 1 + number * SIZE * SIZE) + i * SIZE;
+                clauseOneSet[ii] = ii + 1 + numberSizeSize + iSize;
             }
             printClause(clauseRow, SIZE);
             printClause(clauseCol, SIZE);
@@ -455,6 +462,7 @@ void readSudokuFile(const char* fileName) {
     fgets(line, sizeof(line), file);
     sscanf(line, "%d", &LITTLE_SIZE);
     SIZE = LITTLE_SIZE * LITTLE_SIZE;
+    SIZE_QUAD = SIZE * SIZE;
     mySudoku = malloc(sizeof(int *) * SIZE * SIZE);
     for(int i = 0; i < SIZE; i++) mySudoku[i] = malloc(SIZE * sizeof(int));
     solvedSudoku = malloc(sizeof(int) * SIZE * SIZE);
