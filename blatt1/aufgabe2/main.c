@@ -107,11 +107,16 @@ void generateSubgridCnf() {
 
                 for (int cell1 = 0; cell1 < SIZE; cell1++) {
                     for (int cell2 = cell1 + 1; cell2 < SIZE; cell2++) {
-                        int conflict_clause[2] = {
-                            -(clause[cell1]),
-                            -(clause[cell2])
-                        };
-                        printClause(conflict_clause, 2);
+                        const int help = clause[cell2] - clause[cell1];
+                        if (help < SIZE * LITTLE_SIZE || help % SIZE_QUAD == 0) {
+
+                        } else {
+                            const int conflict_clause[2] = {
+                                -(clause[cell1]),
+                                -(clause[cell2])
+                            };
+                            printClause(conflict_clause, 2);
+                        }
                     }
                 }
             }
@@ -337,9 +342,10 @@ bool validateSudoku() {
 
 #if (!SPEED_OPTION)
 void calculateNumberVariablesAndClauses() {
-    const int numStandardClauses = SIZE * SIZE * (((SIZE * (SIZE - 1)) / 2) + 1);
-    const int numUsageStandardClause = 3; // row, col, subGrid Clauses
-    const int numberClausesOneNumberMustBeSet = SIZE * SIZE;
+    const int numStandardClauses = SIZE_QUAD * (((SIZE * (SIZE - 1)) / 2) + 1);
+    const int numUsageStandardClause = 2; // row, col, subGrid Clauses
+    const int numSubGridClauses = ((SIZE * ((LITTLE_SIZE - 1) * (LITTLE_SIZE - 1))) / 2) * SIZE_QUAD + SIZE_QUAD;
+    const int numberClausesOneNumberMustBeSet = SIZE_QUAD;
     int numberKnownNumbers = 0;
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -348,7 +354,11 @@ void calculateNumberVariablesAndClauses() {
             }
         }
     }
-    const int numberClauses = numStandardClauses * numUsageStandardClause + numberKnownNumbers * SIZE + numberClausesOneNumberMustBeSet;
+    const int numberClauses =
+        numStandardClauses * numUsageStandardClause
+        + numberKnownNumbers * SIZE
+        + numberClausesOneNumberMustBeSet
+        + numSubGridClauses;
 
     fprintf(
         fptr,

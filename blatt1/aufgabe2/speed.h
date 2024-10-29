@@ -30,9 +30,10 @@ void printClause(const int *clause, const int size) {
 #if (SPEED_OPTION)
 // ReSharper disable once CppNonInlineFunctionDefinitionInHeaderFile
 void calculateNumberVariablesAndClauses() {
-    const int numStandardClauses = SIZE * SIZE * (((SIZE * (SIZE - 1)) / 2) + 1);
-    const int numUsageStandardClause = 3; // row, col, subGrid Clauses
-    const int numberClausesOneNumberMustBeSet = SIZE * SIZE;
+    const int numStandardClauses = SIZE_QUAD * (((SIZE * (SIZE - 1)) / 2) + 1);
+    const int numSubGridClauses = ((SIZE * ((LITTLE_SIZE - 1) * (LITTLE_SIZE - 1))) / 2) * SIZE_QUAD + SIZE_QUAD;
+    const int numUsageStandardClause = 2; // row, col Clauses
+    const int numberClausesOneNumberMustBeSet = SIZE_QUAD;
     int numberKnownNumbers = 0;
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -41,7 +42,11 @@ void calculateNumberVariablesAndClauses() {
             }
         }
     }
-    const int numberClauses = numStandardClauses * numUsageStandardClause + numberKnownNumbers * SIZE + numberClausesOneNumberMustBeSet;
+    const int numberClauses =
+        numStandardClauses * numUsageStandardClause
+        + numberKnownNumbers * SIZE
+        + numberClausesOneNumberMustBeSet
+        + numSubGridClauses;
 
     fprintf(
         fptr,
@@ -60,9 +65,7 @@ void generateSpeedCNF() {
     int clauseOneSet[SIZE];
     int conflictClauseCol[2];
     int conflictClauseRow[2];
-    int conflictClauseGrid1[2];
-    int conflictClauseGrid2[2];
-    int conflictClauseGrid3[2];
+    int conflictClausesGrid[LITTLE_SIZE][2];
     for (int number = 0; number < SIZE; number++) {
         const int numberSizeSize = number * SIZE_QUAD;
         for (int i = 0; i < SIZE; i++) {
@@ -115,9 +118,9 @@ void generateSpeedCNF() {
             for (int iii = 0; iii < SIZE; iii++) {
                 conflictClauseRow[0] = -clauseRow[iii];
                 conflictClauseCol[0] = -clauseCol[iii];
-                conflictClauseGrid1[0] = -clauseGrid[0][iii];
-                conflictClauseGrid2[0] = -clauseGrid[1][iii];
-                conflictClauseGrid3[0] = -clauseGrid[2][iii];
+                for (int confGrid = 0; confGrid < LITTLE_SIZE; confGrid++) {
+                    conflictClausesGrid[confGrid][0] = -clauseGrid[confGrid][iii];
+                }
                 for (int iv = iii + 1; iv < SIZE; iv++) {
                     //row
                     conflictClauseRow[1] = -clauseRow[iv];
@@ -129,12 +132,13 @@ void generateSpeedCNF() {
 
                     //subGrid
                     if (isSubGrid == 1) {
-                        conflictClauseGrid1[1] = -clauseGrid[0][iv];
-                        printClause(conflictClauseGrid1, 2);
-                        conflictClauseGrid2[1] = -clauseGrid[1][iv];
-                        printClause(conflictClauseGrid2, 2);
-                        conflictClauseGrid3[1] = -clauseGrid[2][iv];
-                        printClause(conflictClauseGrid3, 2);
+                        for (int confGrid = 0; confGrid < LITTLE_SIZE; confGrid++) {
+                            const int help = clauseGrid[confGrid][iv] - clauseGrid[confGrid][iii];
+                            if (help >= SIZE * LITTLE_SIZE && help % SIZE_QUAD != 0) {
+                                conflictClausesGrid[confGrid][1] = -clauseGrid[confGrid][iv];
+                                printClause(conflictClausesGrid[confGrid], 2);
+                            }
+                        }
                     }
                 }
             }

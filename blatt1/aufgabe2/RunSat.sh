@@ -1,5 +1,8 @@
-./createDimacs -f /home/user/Downloads/sudokus/puzzle03a.sudoku
+# set your paths here:
+sudokuFile="/home/user/Downloads/sudokus/puzzle04a.sudoku"
+satSolverPath="/home/user/Downloads/kissat-4.0.1-linux-amd64"
+resultFileName="result.txt"
 
-/home/user/Downloads/kissat-4.0.1-linux-amd64 clauses.dimacs | grep -e ^v > result.txt
-
-./readSolution -f /home/user/Downloads/sudokus/puzzle03a.sudoku -r result.txt
+./createDimacs -f /home/user/Downloads/sudokus/puzzle04a.sudoku
+"$satSolverPath" clauses.dimacs | grep -e ^v > "$resultFileName"
+./readSolution -f "$sudokuFile" -r "$resultFileName"
