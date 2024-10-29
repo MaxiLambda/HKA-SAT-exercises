@@ -1,132 +1,19 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
 #define WRITE_TO_FILE true
 #define WRITE_TO_CONSOLE false
 #define WRITE_STATUS_TO_CONSOLE false
 #define SPEED_OPTION true
 
-static int LITTLE_SIZE;
-static int SIZE;
-static int SIZE_QUAD;
-int** mySudoku;
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "speed.h"
+
 int** solvedSudoku;
-FILE* fptr;
 float timeInSeconds = -1;
 
-void printClause(int *clause, int size) {
-    if (WRITE_TO_CONSOLE) {
-        for (int i = 0; i < size; i++) {
-            if (i != 0) printf(" ");
-            printf("%d", clause[i]);
-        }
-        printf(" 0\n");
-    }
-
-    if (WRITE_TO_FILE) {
-        for (int i = 0; i < size; i++) {
-            if (i != 0) fprintf(fptr, " "); // TODO does the compiler optimize this?
-            fprintf(fptr, "%d", clause[i]);
-        }
-        fprintf(fptr, " 0\n");
-    }
-}
-
-#if (SPEED_OPTION)
-void generateSpeedCNF() {
-    int clauseGrid[LITTLE_SIZE][SIZE];
-    int clauseRow[SIZE];
-    int clauseCol[SIZE];
-    int clauseKnown[SIZE];
-    int clauseOneSet[SIZE];
-    int conflictClauseCol[2];
-    int conflictClauseRow[2];
-    int conflictClauseGrid1[2];
-    int conflictClauseGrid2[2];
-    int conflictClauseGrid3[2];
-    for (int number = 0; number < SIZE; number++) {
-        const int numberSizeSize = number * SIZE_QUAD;
-        for (int i = 0; i < SIZE; i++) {
-            const int iSize = i * SIZE;
-            const int iSizeNumberSizeSize = numberSizeSize + iSize;
-            char isSubGrid = 0;
-            //known number
-            if (mySudoku[number][i] != 0) {
-                for (int iii = 1; iii <= SIZE; iii++) {
-                    if (mySudoku[number][i] == iii) {
-                        clauseKnown[0] = iii + iSizeNumberSizeSize;
-                    } else {
-                        clauseKnown[0] = -(iii + iSizeNumberSizeSize);
-                    }
-                    printClause(clauseKnown, 1);
-                }
-            } // TODO evtl. einen else Zweig?
-
-            const int numberISizeSize1 = number + iSize * SIZE + 1;
-            const int numberISizeSize11 = number + iSize + 1;
-            for (int ii = 0; ii < SIZE; ii++) {
-                const int iiSize = SIZE * ii;
-                //row
-                clauseRow[ii] = numberISizeSize1 + iiSize;
-
-                //col
-                clauseCol[ii] = numberISizeSize11 + SIZE * iiSize;
-
-                //subGrid
-                if (i < LITTLE_SIZE && ii < LITTLE_SIZE) {
-                    isSubGrid = 1;
-                    int index = 0;
-                    for (int row = 0; row < LITTLE_SIZE; row++) {
-                        for (int col = 0; col < LITTLE_SIZE; col++) {
-                            clauseGrid[ii][index++] = number + 1 + (i * LITTLE_SIZE * SIZE + row * SIZE) * SIZE + (
-                                                          ii * LITTLE_SIZE * SIZE + col * SIZE);
-                        }
-                    }
-                    printClause(clauseGrid[ii], SIZE);
-                }
-
-                //oneMustBeSet
-                clauseOneSet[ii] = ii + 1 + numberSizeSize + iSize;
-            }
-            printClause(clauseRow, SIZE);
-            printClause(clauseCol, SIZE);
-            printClause(clauseOneSet, SIZE);
-
-            // only one clause
-            for (int iii = 0; iii < SIZE; iii++) {
-                conflictClauseRow[0] = -clauseRow[iii];
-                conflictClauseCol[0] = -clauseCol[iii];
-                conflictClauseGrid1[0] = -clauseGrid[0][iii];
-                conflictClauseGrid2[0] = -clauseGrid[1][iii];
-                conflictClauseGrid3[0] = -clauseGrid[2][iii];
-                for (int iv = iii + 1; iv < SIZE; iv++) {
-                    //row
-                    conflictClauseRow[1] = -clauseRow[iv];
-                    printClause(conflictClauseRow, 2);
-
-                    // col
-                    conflictClauseCol[1] = -clauseCol[iv];
-                    printClause(conflictClauseCol, 2);
-
-                    //subGrid
-                    if (isSubGrid == 1) {
-                        conflictClauseGrid1[1] = -clauseGrid[0][iv];
-                        printClause(conflictClauseGrid1, 2);
-                        conflictClauseGrid2[1] = -clauseGrid[1][iv];
-                        printClause(conflictClauseGrid2, 2);
-                        conflictClauseGrid3[1] = -clauseGrid[2][iv];
-                        printClause(conflictClauseGrid3, 2);
-                    }
-                }
-            }
-        }
-    }
-}
-#endif
-
+#if (!SPEED_OPTION)
 void generateRowCnf() {
     printf("generate Row CNF\n");
     if (WRITE_TO_FILE) {
@@ -276,6 +163,7 @@ void generateOneNumberMustBeSetCnf() {
         }
     }
 }
+#endif
 
 bool readAssignment() {
     FILE *file = fopen("result.txt", "r");
@@ -289,6 +177,7 @@ bool readAssignment() {
         && line[7] == 'I' && line[8] == 'S' && line[9] == 'F' && line[10] == 'I' && line[11] == 'A' && line[12] == 'B'
         && line[13] == 'L' && line[14] == 'E'
     ) {
+#if (!SPEED_OPTION)
         while (fgets(line, sizeof(line), file)) {
             if (line[0] == 'c' && line[10] == 't' && line[11] == 'i' && line[12] == 'm' && line[13] == 'e') {
                 const char *ptr = line + 47;
@@ -301,10 +190,12 @@ bool readAssignment() {
         }
 
         fclose(file);
+#endif
         return false;
     }
 
     while (fgets(line, sizeof(line), file)) {
+#if (!SPEED_OPTION)
         if (endOfAssignmentReached == 1) {
             if (line[0] == 'c' && line[10] == 't' && line[11] == 'i' && line[12] == 'm' && line[13] == 'e') {
                 const char *ptr = line + 15;
@@ -316,17 +207,24 @@ bool readAssignment() {
 
             break;
         }
+#endif
         const char *ptr = line + 2; // skip v and space
         int num;
         while (sscanf(ptr, "%d", &num) == 1) {
+#if (!SPEED_OPTION)
             if (count > SIZE * SIZE * SIZE) {
                 printf("Too many numbers, exceeding the limit\n");
                 fclose(file);
                 return false;
             }
+#endif
             if (num == 0) { // End of assignment reached
+#if (!SPEED_OPTION)
                 endOfAssignmentReached = 1;
                 break;
+#else
+                return true;
+#endif
             }
             if (num > 0) {
                 const int parsedNumber = (num - ((num / SIZE) * SIZE));
@@ -345,10 +243,15 @@ bool readAssignment() {
         }
     }
 
+#if (!SPEED_OPTION)
     fclose(file);
     return true;
+#else
+    return false;
+#endif
 }
 
+#if (!SPEED_OPTION)
 bool checkDistinct(const int arr[]) {
     bool found[SIZE];
     for (int i = 0; i < SIZE; i++) {
@@ -430,7 +333,9 @@ bool checkNoChangedOriginalValues() {
 bool validateSudoku() {
     return checkRows() && checkColumns() && checkSubgrids() && checkNoChangedOriginalValues();
 }
+#endif
 
+#if (!SPEED_OPTION)
 void calculateNumberVariablesAndClauses() {
     const int numStandardClauses = SIZE * SIZE * (((SIZE * (SIZE - 1)) / 2) + 1);
     const int numUsageStandardClause = 3; // row, col, subGrid Clauses
@@ -454,6 +359,7 @@ void calculateNumberVariablesAndClauses() {
 
     printf("Number clauses required: %d\n", numberClauses);
 }
+#endif
 
 void readSudokuFile(const char* fileName) {
     FILE *file = fopen(fileName, "r");
@@ -465,25 +371,33 @@ void readSudokuFile(const char* fileName) {
     SIZE_QUAD = SIZE * SIZE;
     mySudoku = malloc(sizeof(int *) * SIZE * SIZE);
     for(int i = 0; i < SIZE; i++) mySudoku[i] = malloc(SIZE * sizeof(int));
+#if (!SPEED_OPTION)
     solvedSudoku = malloc(sizeof(int) * SIZE * SIZE);
     for(int i = 0; i < SIZE; i++) solvedSudoku[i] = malloc(SIZE * sizeof(int));
+#else
+    solvedSudoku = mySudoku; // nur einmal speicher allokieren spart Zeit.
+#endif
 
     int rowCount = 0;
     while (fgets(line, sizeof(line), file)) {
+#if (!SPEED_OPTION)
         if (rowCount > SIZE) {
             printf("Too many lines, exceeding the limit\n");
             fclose(file);
             return;
         }
+#endif
         int columnCount = 0;
         int num;
         const char *ptr = line;
         while (sscanf(ptr, "%d", &num) == 1) {
+#if (!SPEED_OPTION)
             if (rowCount > SIZE) {
                 printf("Too many columns, exceeding the limit\n");
                 fclose(file);
                 return;
             }
+#endif
             mySudoku[rowCount][columnCount] = num;
 
             columnCount++;
@@ -551,14 +465,15 @@ int main(const int argc, char **argv) {
     }
     if (sudoKuFilePath == NULL) {
         printf("option f requires an argument!\nUsage: -f <path_to_sudoku_file> -s <path_to_sat_solver>\n");
-        return 0;
+        _Exit(EXIT_FAILURE);
     }
     if (satSolverPath == NULL) {
         printf("option s requires an argument!\nUsage: -f <path_to_sudoku_file> -s <path_to_sat_solver>\n");
-        return 0;
+        _Exit(EXIT_FAILURE);
     }
 
     readSudokuFile(sudoKuFilePath);
+#if (!SPEED_OPTION)
     if (mySudoku == NULL) {
         printf("failed to allocate memory for original sudoku!\n");
         free(mySudoku);
@@ -573,6 +488,7 @@ int main(const int argc, char **argv) {
     }
 
     printf("Build .dimacs file with clauses\n");
+#endif
     // Build .dimacs file with clauses
     fptr = fopen("clauses.dimacs", "w");
     calculateNumberVariablesAndClauses();
@@ -582,15 +498,17 @@ int main(const int argc, char **argv) {
 #if (SPEED_OPTION)
     generateSpeedCNF();
 #else
-    // generateRowCnf();
-    // generateColumnCnf();
+    generateRowCnf();
+    generateColumnCnf();
     generateSubgridCnf();
-    // generateKnownNumbersCnf();
-    // generateOneNumberMustBeSetCnf();
+    generateKnownNumbersCnf();
+    generateOneNumberMustBeSetCnf();
 #endif
-    fclose(fptr);
+    fclose(fptr); // close file, so the changes are actually written.
 
+#if (!SPEED_OPTION)
     printf("Calculate solution\n");
+#endif
     // Calculate solution via terminal
     const char* firstPart = "sh -c '";
     const char* end = " clauses.dimacs | grep -e ^s -e ^v -e \"^c process-time:\" > result.txt'";
@@ -603,6 +521,7 @@ int main(const int argc, char **argv) {
     strcpy(command + firstPartLength, satSolverPath);
     strcpy(command + firstPartLength + pathLength, end);
     const int ret = system(command);
+#if (!SPEED_OPTION)
     free(command);
     if (ret == 0) {
         printf("Command executed successfully.\n");
@@ -614,24 +533,32 @@ int main(const int argc, char **argv) {
     }
 
     printf("Read solution and show it\n");
+#endif
     // Read solution from file and show it
     if (readAssignment()) {
         showSudokuSolution();
-
+#if (!SPEED_OPTION)
         if (validateSudoku(solvedSudoku)) {
             printf("The Sudoku solution is valid.\n");
         } else {
             printf("The Sudoku solution is invalid.\n");
         }
+#endif
     } else {
         printf("The Sudoku can't be solved!\n");
     }
 
+#if (!SPEED_OPTION)
     printf("it took the SAT-solver %f seconds to get a solution.\n", timeInSeconds);
 
     for(int i = 0; i < SIZE; i++) free(mySudoku[i]);
     free(mySudoku);
     for(int i = 0; i < SIZE; i++) free(solvedSudoku[i]);
     free(solvedSudoku);
+#endif
+#if (SPEED_OPTION)
+    _Exit(EXIT_SUCCESS);
+#else
     return 0;
+#endif
 }
