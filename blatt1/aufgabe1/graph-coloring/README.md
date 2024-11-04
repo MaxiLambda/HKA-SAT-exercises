@@ -1,5 +1,14 @@
 # How it should work
 
+## Build instructions
+`cd blatt1/aufgabe1/graph_coloring`
+`mkdir build && cd build`
+`cmake CMakeLists.txt ..`
+`make`
+
+## Run with
+`./graph_coloring ./file.txt`
+
 ## Read DIMACS graph file
 * ignore all lines starting with c
 * line with `p` determines the number of nodes and edges

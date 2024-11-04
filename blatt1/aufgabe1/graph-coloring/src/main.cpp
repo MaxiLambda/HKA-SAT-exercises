@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
 
  Graph_Definition* def =   graph_from_file(argv[1]);
 
-  auto end_read_file = std::chrono::high_resolution_clock::now();
+//  auto end_read_file = std::chrono::high_resolution_clock::now();
 
   //early return if no edges are given, one color is sufficient then
   if (def->num_edges == 0) {
@@ -33,13 +33,13 @@ int main(int argc, char *argv[]) {
     ipasir_add(solver, -def->vals[i]);
     ipasir_add(solver, -def->vals[i + 1]);
     ipasir_add(solver, 0);
-    std::cout << -def->vals[i] << " " << -def->vals[i + 1] << " 0" << std::endl;
+//    std::cout << -def->vals[i] << " " << -def->vals[i + 1] << " 0" << std::endl;
   }
 
   while (!solved) {
     //changes for next round
     colors++;
-    std::cout << "Try solving with " << colors << " colors" << std::endl;
+//    std::cout << "Try solving with " << colors << " colors" << std::endl;
     for (int i = 0; i < def->num_edges * 2; ++i) {
       //the new variable has the same value as the previous one, offset by the number of nodes +1
       //the plus one is reserved for assumptions
@@ -51,21 +51,21 @@ int main(int argc, char *argv[]) {
       ipasir_add(solver, -def->vals[i]);
       ipasir_add(solver, -def->vals[i + 1]);
       ipasir_add(solver, 0);
-      std::cout << -def->vals[i] << " " << -def->vals[i + 1] << " 0" << std::endl;
+//      std::cout << -def->vals[i] << " " << -def->vals[i + 1] << " 0" << std::endl;
     }
 
     //add clauses to make sure each node has a color
     for (int i = 1; i <= def->num_nodes; ++i) {
       //assumption variable, for the current round
       ipasir_add(solver, colors * (def->num_nodes + 1));
-      std::cout << colors * (def->num_nodes + 1) << " ";
+//      std::cout << colors * (def->num_nodes + 1) << " ";
       //add all multiples/color values of the node i
       for (int j = 0; j < colors; ++j) {
         ipasir_add(solver, i + j * (def->num_nodes + 1));
-        std::cout << i + j * (def->num_nodes + 1) << " ";
+//        std::cout << i + j * (def->num_nodes + 1) << " ";
       }
       ipasir_add(solver, 0);
-      std::cout << 0 << std::endl;
+//      std::cout << 0 << std::endl;
     }
 
     //add assumptions to make sure each node has at least one color
@@ -76,11 +76,11 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < colors; ++i) {
       //disable all assumptions but the last
       ipasir_assume(solver, i * (def->num_nodes + 1));
-      std::cout << "assume " << i * (def->num_nodes + 1) << std::endl;
+//      std::cout << "assume " << i * (def->num_nodes + 1) << std::endl;
     }
     //enable last assumption
     ipasir_assume(solver, -colors * (def->num_nodes + 1));
-    std::cout << "assume " << -colors * (def->num_nodes + 1) << std::endl;
+//    std::cout << "assume " << -colors * (def->num_nodes + 1) << std::endl;
 
     //check if solvable
     result = ipasir_solve(solver);
@@ -92,27 +92,27 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  auto done_time = std::chrono::high_resolution_clock::now();
+//  auto done_time = std::chrono::high_resolution_clock::now();
 
   std::cout << "Solvable with " << colors << " colors" << std::endl;
 
   //print the solution, each row corresponds to the bitvector of a node
   //the assumptions are omitted, change "def->num_nodes" to "def->num_nodes + 1" to print them as the last line
-  for (int i = 1; i <= def->num_nodes; ++i) {
-    for (int j = 0; j < colors; ++j) {
-      std::cout << ipasir_val(solver, i + j * (def->num_nodes + 1)) << " ";
-    }
-    std::cout << std::endl;
-  }
+//  for (int i = 1; i <= def->num_nodes; ++i) {
+//    for (int j = 0; j < colors; ++j) {
+//      std::cout << ipasir_val(solver, i + j * (def->num_nodes + 1)) << " ";
+//    }
+//    std::cout << std::endl;
+//  }
 
-  auto parse_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_read_file - start_time);
-  auto solve_time = std::chrono::duration_cast<std::chrono::milliseconds>(done_time - end_read_file);
-  auto full_time = std::chrono::duration_cast<std::chrono::milliseconds>(done_time - start_time);
+//  auto parse_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_read_file - start_time);
+//  auto solve_time = std::chrono::duration_cast<std::chrono::milliseconds>(done_time - end_read_file);
+//  auto full_time = std::chrono::duration_cast<std::chrono::milliseconds>(done_time - start_time);
 
   //print again, because printing all the nodes takes a lot of space
-  std::cout << "Solvable with " << colors << " colors" << std::endl;
-  std::cout <<"Parsing file took " <<   parse_time.count()  << " ms" << std::endl;
-  std::cout <<"Solving took " <<   solve_time.count()  << " ms" << std::endl;
-  std::cout << "Full duration " << full_time.count() << " ms" << std::endl;
+//  std::cout << "Solvable with " << colors << " colors" << std::endl;
+//  std::cout <<"Parsing file took " <<   parse_time.count()  << " ms" << std::endl;
+//  std::cout <<"Solving took " <<   solve_time.count()  << " ms" << std::endl;
+//  std::cout << "Full duration " << full_time.count() << " ms" << std::endl;
   return 0;
 }
