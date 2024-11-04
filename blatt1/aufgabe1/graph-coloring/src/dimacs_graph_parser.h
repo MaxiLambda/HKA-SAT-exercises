@@ -66,7 +66,7 @@ Graph_Definition* graph_from_file(char* path) {
         }
 
         // Output or process x and y
-        std::cout << "x = " << x << ", y = " << y << std::endl;
+//        std::cout << "x = " << x << ", y = " << y << std::endl;
         edge+=2;
       } else if (first_char == 'c') {
         //skip comments
