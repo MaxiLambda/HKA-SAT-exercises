@@ -1,3 +1,4 @@
+```python
 from pysat.solvers import Glucose3
 from pysat.formula import CNF
 
@@ -28,3 +29,4 @@ def pythagorean_triples(N):
         print("Fehler")
 
 pythagorean_triples(20)
+```
