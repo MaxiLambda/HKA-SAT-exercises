@@ -1,3 +1,5 @@
 # clause files and solution
 clauses.dimacs
 result.txt
+
+./build/*
