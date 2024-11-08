@@ -8,8 +8,7 @@ static int SIZE_QUAD;
 int** mySudoku;
 FILE* fptr;
 
-// ReSharper disable once CppNonInlineFunctionDefinitionInHeaderFile
-void printClause(const int *clause, const int size) {
+static inline void printClause(const int *clause, const int size) {
 #if (WRITE_TO_CONSOLE)
     for (int i = 0; i < size; i++) {
         if (i != 0) printf(" ");
@@ -28,8 +27,7 @@ void printClause(const int *clause, const int size) {
 }
 
 #if (SPEED_OPTION)
-// ReSharper disable once CppNonInlineFunctionDefinitionInHeaderFile
-void calculateNumberVariablesAndClauses() {
+static inline void calculateNumberVariablesAndClauses() {
     const int numStandardClauses = SIZE_QUAD * (((SIZE * (SIZE - 1)) / 2) + 1);
     const int numSubGridClauses = ((SIZE * ((LITTLE_SIZE - 1) * (LITTLE_SIZE - 1))) / 2) * SIZE_QUAD + SIZE_QUAD;
     const int numUsageStandardClause = 2; // row, col Clauses
@@ -56,8 +54,7 @@ void calculateNumberVariablesAndClauses() {
     );
 }
 
-// ReSharper disable once CppNonInlineFunctionDefinitionInHeaderFile
-void generateSpeedCNF() {
+static inline void generateSpeedCNF() {
     int clauseGrid[LITTLE_SIZE][SIZE];
     int clauseRow[SIZE];
     int clauseCol[SIZE];

@@ -2,6 +2,7 @@
 #define WRITE_TO_CONSOLE false
 #define WRITE_STATUS_TO_CONSOLE false
 #define SPEED_OPTION true
+#define SHOW_ASSIGNMENT false
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -170,11 +171,13 @@ void generateOneNumberMustBeSetCnf() {
 }
 #endif
 
-bool readAssignment() {
+static inline bool readAssignment() {
     FILE *file = fopen("result.txt", "r");
     char line[1024];
     int count = 0;
+#if (!SPEED_OPTION)
     int endOfAssignmentReached = 0;
+#endif
 
     fgets(line, sizeof(line), file);
     if (
@@ -198,6 +201,9 @@ bool readAssignment() {
 #endif
         return false;
     }
+#if (!SHOW_ASSIGNMENT)
+    return true;
+#endif
 
     while (fgets(line, sizeof(line), file)) {
 #if (!SPEED_OPTION)
@@ -371,7 +377,7 @@ void calculateNumberVariablesAndClauses() {
 }
 #endif
 
-void readSudokuFile(const char* fileName) {
+static inline void readSudokuFile(const char* fileName) {
     FILE *file = fopen(fileName, "r");
     char line[1024];
 
@@ -546,7 +552,14 @@ int main(const int argc, char **argv) {
 #endif
     // Read solution from file and show it
     if (readAssignment()) {
+#if (SHOW_ASSIGNMENT)
         showSudokuSolution();
+#else
+        printf("The Sudoku can be solved! It is SAT!\n");
+#if (SPEED_OPTION)
+        _Exit(EXIT_SUCCESS);
+#endif
+#endif
 #if (!SPEED_OPTION)
         if (validateSudoku(solvedSudoku)) {
             printf("The Sudoku solution is valid.\n");
@@ -555,7 +568,10 @@ int main(const int argc, char **argv) {
         }
 #endif
     } else {
-        printf("The Sudoku can't be solved!\n");
+        printf("The Sudoku can't be solved! It is UnSAT!!\n");
+#if (SPEED_OPTION)
+        _Exit(EXIT_SUCCESS);
+#endif
     }
 
 #if (!SPEED_OPTION)
