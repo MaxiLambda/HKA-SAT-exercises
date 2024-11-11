@@ -10,7 +10,7 @@
 `./pytagorean-triplets`
 
 ## Why using ipasir?
-Because i am lazy and did not want to write a DIMACS file
+because it's fast and we already used it in other problems and did not want to write a DIMACS file
 
 ## Schätzen Sie die Anzahl der Variablen und Klauseln ab für die SAT-Codierung aus der Vorlesung für das Pythagoräische-Triple-Problem bis zur Zahl n.
 
