@@ -1,10 +1,10 @@
 <Original clause:
-(!x1 && !(x3 <> x2)) || ((x3 => !x4) && (x1 => (x2 || !x3)) && x4))
+(!x1 && !(x3 <> x2)) || ((x3 => !x4) && (x1 => (x2 && !x3)) && x4))
 
 After removing implications and equivalences
-x1 && (x3 && !x2 || x2 && !x3) || (!x3 || !x4) && (!x1 || x2 || !x3) && x4
+!x1 && (x3 && !x2 || x2 && !x3) || (!x3 || !x4) && (!x1 || x2 && !x3) && x4
 
-After Tseitin Transformation:
+After Tseitin Transformation: <br/>
 (!y0 ||  x3) && (!y0 || !x2) && ( y0 || !x3 ||  x2) && <br/>
 (!y1 ||  x2) && (!y1 || !x3) && ( y1 || !x2 ||  x3) && <br/>
 ( y2 || !y0) && ( y2 || !y1) && (!y2 ||  y0 ||  y1) && <br/>
@@ -16,7 +16,7 @@ After Tseitin Transformation:
 (!y7 ||  y6) && (!y7 ||  x4) && ( y7 || !y6 || !x4) && <br/>
 ( y8 || !y3) && ( y8 || !y7) && (!y8 ||  y3 ||  y7) && y8 <br/>
 
-Unit Propagation of y9, removal of duplicate clauses and BCE:
+Unit Propagation of y9, removal of duplicate clauses and BCE: <br/>
 ~~(!y0 ||  x3) && (!y0 || !x2) && ( y0 || !x3 ||  x2) && ~~ <br/>
 ~~(!y1 ||  x2) && (!y1 || !x3) && ( y1 || !x2 ||  x3) && ~~ <br/>
 ~~( y2 || !y0) && ( y2 || !y1) && (!y2 ||  y0 ||  y1) && ~~ <br/>
