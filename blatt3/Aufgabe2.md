@@ -1,3 +1,4 @@
+```
 m aus {M1, M2, M3}
 g aus {G1, G2}
 
@@ -31,3 +32,4 @@ b)log encoding
 
  1  2  3	//  I) 1 2 ist falsch <-> M1, deshalb 3 = G1 erforderlich
  1 -2 -3	// II) 1 -2 ist falsch <-> M2, deshalb -3 = G2
+```
