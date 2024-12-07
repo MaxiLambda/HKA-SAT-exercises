@@ -23,3 +23,8 @@ b) <br/>
 => we can't use unit propagation as we don't have any units
 
 c)...?
+  Sequential-Counter-Codierung ist für at-most-k constraint. Wenn wir also einen exactly-k constraint wollen, müssen wir doch nur sicherstellen, dass die k Bedingung wahr ist. 
+  Bei der Sequential-Counter-Codierung ist das ja dann der Fall, wenn der Ausgang s(i,k) wahr ist. (1 <= i <= k) 
+  Also bräuchte ich nur zusätzlich die Klausel: s(1,k) || s(2,k) || ... || s(n,k)
+  Leider gibt es den Ausgang s(n,k) nicht. Also bräuchte ich dann eventuell die Ausgänge v1 bis vn statdessen????
+  Einer oder mehrere der Ausgänge v1 bis vn sind auch dann wahr, wenn das k erreicht wurde. Die werden halt nie in den bisherigen Klauseln verwendet, also kein Plan, ob ich die jetzt verwenden darf oder die nur "virtuell" sind.
