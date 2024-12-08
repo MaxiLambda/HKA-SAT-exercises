@@ -14,17 +14,30 @@ b) <br/>
 ![rules](./seq.png "img")
 
 => every Clause with j can be ignored as it has to satisfy 1 < j < k wihich is not possible with k = 1 <br/>
--x 1       ||  s  1   ,1 <br/>
--x i       ||  s  i   ,1 <br/>
--s (i-1),1 ||  s  i   ,1 <br/>
--x i       || -s (i-1),1 <br/>
--x n       || -s (n-1),1 <br/>
-
+```
+-x 1       ||  s  1   ,1 
+-x i       ||  s  i   ,1 
+-s (i-1),1 ||  s  i   ,1 
+-x i       || -s (i-1),1 
+-x n       || -s (n-1),1 
+```
 => we can't use unit propagation as we don't have any units
 
-c)...?
-  Sequential-Counter-Codierung ist für at-most-k constraint. Wenn wir also einen exactly-k constraint wollen, müssen wir doch nur sicherstellen, dass die k Bedingung wahr ist. 
-  Bei der Sequential-Counter-Codierung ist das ja dann der Fall, wenn der Ausgang s(i,k) wahr ist. (1 <= i <= k) 
-  Also bräuchte ich nur zusätzlich die Klausel: s(1,k) || s(2,k) || ... || s(n,k)
-  Leider gibt es den Ausgang s(n,k) nicht. Also bräuchte ich dann eventuell die Ausgänge v1 bis vn statdessen????
-  Einer oder mehrere der Ausgänge v1 bis vn sind auch dann wahr, wenn das k erreicht wurde. Die werden halt nie in den bisherigen Klauseln verwendet, also kein Plan, ob ich die jetzt verwenden darf oder die nur "virtuell" sind.
+c)
+The regular counter checks that no overflow occures
+We can use the counter value to assert the exact value
+As there are no sum s i,j values for, i = n, we need to create the value we need 
+=> either the previous counter was already at k and x n is false or the previous counter was at k-1 and the x n is true
+=> (s(n-1,k) && -x(n)) || (s(n,k-1) && x(n))
+=> In CNF ((s(n-1,k) ∨ s(n,k-1)) ∧ ((s(n-1,k) ∨ x(n)) ∧ ( -x(n) ∨ s(n,k-1)) ∧ ( -x(n) ∨ x(n))
+=> remove last clause because it is always true ((s(n-1,k) ∨ s(n,k-1)) ∧ ((s(n-1,k) ∨ x(n)) ∧ ( -x(n) ∨ s(n,k-1))
+```
+-x 1       ||  s  1   ,1 
+-x i       ||  s  i   ,1 
+-s (i-1),1 ||  s  i   ,1 
+-x i       || -s (i-1),1
+-x n       || -s (n-1),1 
+ s (n-1),k ||  s  n   ,k-1
+ x  n      ||  s (n-1),k  
+-x n       ||  s  n   ,k-1 
+```
